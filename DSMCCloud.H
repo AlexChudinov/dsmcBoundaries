@@ -110,47 +110,20 @@ class DSMCCloud
         //- A field holding the remainder from the previous collision selections
         volScalarField::Internal collisionSelectionRemainder_;
 
-        //- Heat flux at surface field
-        volScalarField q_;
-
-        //- Force density at surface field
-        volVectorField fD_;
-
-        //- Number density field
-        volScalarField rhoN_;
-
-        //- Mass density field
-        volScalarField rhoM_;
-
-        //- Dsmc particle density field
-        volScalarField dsmcRhoN_;
-
-        //- Linear kinetic energy density field
-        volScalarField linearKE_;
-
-        //- Internal energy density field
-        volScalarField internalE_;
-
-        // Internal degree of freedom density field
-        volScalarField iDof_;
-
-        //- Momentum density field
-        volVectorField momentum_;
-
         //- Parcel constant properties - one for each type
         List<typename ParcelType::constantProperties> constProps_;
 
         //- Random number generator
         Random rndGen_;
 
+        //gas number density
+        volScalarField rhoN_;
 
-        // boundary value fields
+        //temperature
+        volScalarField T_;
 
-            //- Boundary temperature
-            volScalarField boundaryT_;
-
-            //- Boundary velocity
-            volVectorField boundaryU_;
+        //velocity
+        volVectorField U_;
 
 
         // References to the cloud sub-models
@@ -177,7 +150,7 @@ class DSMCCloud
         void buildCellOccupancy();
 
         //- Initialise the system
-        void initialise(const IOdictionary& dsmcInitialiseDict);
+        void initialise();
 
         //- Calculate collisions between molecules
         void collisions();
@@ -193,21 +166,11 @@ public:
 
     // Constructors
 
-        //- Construct given name and mesh, will read Parcels and fields from
-        //  file
-        DSMCCloud
-        (
-            const word& cloudName,
-            const fvMesh& mesh,
-            bool readFields = true
-        );
-
         //- Construct given name, mesh and initialisation dictionary.
         DSMCCloud
         (
             const word& cloudName,
-            const fvMesh& mesh,
-            const IOdictionary& dsmcInitialiseDict
+            const fvMesh& mesh
         );
 
         //- Disallow default bitwise copy construction
@@ -269,37 +232,6 @@ public:
 
                 //- Return references to the random object
                 inline Random& rndGen();
-
-
-            // References to the boundary fields for surface data collection
-
-                //- Return non-const heat flux boundary field reference
-                inline volScalarField::Boundary& qBF();
-
-                //- Return non-const force density at boundary field reference
-                inline volVectorField::Boundary& fDBF();
-
-                //- Return non-const number density boundary field reference
-                inline volScalarField::Boundary& rhoNBF();
-
-                //- Return non-const mass density boundary field reference
-                inline volScalarField::Boundary& rhoMBF();
-
-                //- Return non-const linear kinetic energy density boundary
-                //  field reference
-                inline volScalarField::Boundary& linearKEBF();
-
-                //- Return non-const internal energy density boundary field
-                // reference
-                inline volScalarField::Boundary& internalEBF();
-
-                //- Return non-const internal degree of freedom density boundary
-                //  field reference
-                inline volScalarField::Boundary& iDofBF();
-
-                //- Return non-const momentum density boundary field reference
-                inline volVectorField::Boundary& momentumBF();
-
 
             // References to the macroscopic fields
 
@@ -480,7 +412,6 @@ public:
         void operator=(const DSMCCloud&) = delete;
 };
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -488,6 +419,21 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "DSMCCloudI.H"
+
+template<class ParcelType>
+inline const typename ParcelType::constantProperties&
+Foam::DSMCCloud<ParcelType>::constProps(label typeId) const
+{
+    if (typeId < 0 || typeId >= constProps_.size())
+    {
+        FatalErrorInFunction
+            << "constantProperties for requested typeId index "
+            << typeId << " do not exist" << nl
+            << abort(FatalError);
+    }
+
+    return constProps_[typeId];
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

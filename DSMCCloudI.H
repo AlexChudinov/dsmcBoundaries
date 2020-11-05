@@ -99,110 +99,10 @@ Foam::DSMCCloud<ParcelType>::constProps() const
 
 
 template<class ParcelType>
-inline const typename ParcelType::constantProperties&
-Foam::DSMCCloud<ParcelType>::constProps
-(
-    label typeId
-) const
-{
-    if (typeId < 0 || typeId >= constProps_.size())
-    {
-        FatalErrorInFunction
-            << "constantProperties for requested typeId index "
-            << typeId << " do not exist" << nl
-            << abort(FatalError);
-    }
-
-    return constProps_[typeId];
-}
-
-
-template<class ParcelType>
 inline Foam::Random& Foam::DSMCCloud<ParcelType>::rndGen()
 {
     return rndGen_;
 }
-
-
-template<class ParcelType>
-inline Foam::volScalarField::Boundary&
-Foam::DSMCCloud<ParcelType>::qBF()
-{
-    return q_.boundaryFieldRef();
-}
-
-
-template<class ParcelType>
-inline Foam::volVectorField::Boundary&
-Foam::DSMCCloud<ParcelType>::fDBF()
-{
-    return fD_.boundaryFieldRef();
-}
-
-
-template<class ParcelType>
-inline Foam::volScalarField::Boundary&
-Foam::DSMCCloud<ParcelType>::rhoNBF()
-{
-    return rhoN_.boundaryFieldRef();
-}
-
-
-template<class ParcelType>
-inline Foam::volScalarField::Boundary&
-Foam::DSMCCloud<ParcelType>::rhoMBF()
-{
-    return rhoM_.boundaryFieldRef();
-}
-
-
-template<class ParcelType>
-inline Foam::volScalarField::Boundary&
-Foam::DSMCCloud<ParcelType>::linearKEBF()
-{
-    return linearKE_.boundaryFieldRef();
-}
-
-
-template<class ParcelType>
-inline Foam::volScalarField::Boundary&
-Foam::DSMCCloud<ParcelType>::internalEBF()
-{
-    return internalE_.boundaryFieldRef();
-}
-
-
-template<class ParcelType>
-inline Foam::volScalarField::Boundary&
-Foam::DSMCCloud<ParcelType>::iDofBF()
-{
-    return iDof_.boundaryFieldRef();
-}
-
-
-template<class ParcelType>
-inline Foam::volVectorField::Boundary&
-Foam::DSMCCloud<ParcelType>::momentumBF()
-{
-    return momentum_.boundaryFieldRef();
-}
-
-
-template<class ParcelType>
-inline const Foam::volScalarField&
-Foam::DSMCCloud<ParcelType>::boundaryT() const
-{
-    return boundaryT_;
-}
-
-
-template<class ParcelType>
-inline const Foam::volVectorField&
-Foam::DSMCCloud<ParcelType>::boundaryU() const
-{
-    return boundaryU_;
-}
-
 
 template<class ParcelType>
 inline const Foam::BinaryCollisionModel<Foam::DSMCCloud<ParcelType>>&
@@ -407,74 +307,12 @@ Foam::DSMCCloud<ParcelType>::maxwellianMostProbableSpeed
     return tfld();
 }
 
-
-template<class ParcelType>
-inline const Foam::volScalarField& Foam::DSMCCloud<ParcelType>::q() const
-{
-    return q_;
-}
-
-
-template<class ParcelType>
-inline const Foam::volVectorField& Foam::DSMCCloud<ParcelType>::fD() const
-{
-    return fD_;
-}
-
-
 template<class ParcelType>
 inline const Foam::volScalarField&
 Foam::DSMCCloud<ParcelType>::rhoN() const
 {
     return rhoN_;
 }
-
-
-template<class ParcelType>
-inline const Foam::volScalarField& Foam::DSMCCloud<ParcelType>::rhoM() const
-{
-    return rhoM_;
-}
-
-
-template<class ParcelType>
-inline const Foam::volScalarField&
-Foam::DSMCCloud<ParcelType>::dsmcRhoN() const
-{
-    return dsmcRhoN_;
-}
-
-
-template<class ParcelType>
-inline const Foam::volScalarField&
-Foam::DSMCCloud<ParcelType>::linearKE() const
-{
-    return linearKE_;
-}
-
-
-template<class ParcelType>
-inline const Foam::volScalarField&
-Foam::DSMCCloud<ParcelType>::internalE() const
-{
-    return internalE_;
-}
-
-
-template<class ParcelType>
-inline const Foam::volScalarField&
-Foam::DSMCCloud<ParcelType>::iDof() const
-{
-    return iDof_;
-}
-
-
-template<class ParcelType>
-inline const Foam::volVectorField& Foam::DSMCCloud<ParcelType>::momentum() const
-{
-    return momentum_;
-}
-
 
 template<class ParcelType>
 inline void Foam::DSMCCloud<ParcelType>::clear()
