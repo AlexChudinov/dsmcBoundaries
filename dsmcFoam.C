@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         )
     );
 
-    Info<< nl << "Constructing dsmcCloud " << endl;
+    Info<< nl << "Constructing dsmcCloud for time" << endl;
     dsmcCloud dsmc("dsmc", mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

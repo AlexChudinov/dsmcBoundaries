@@ -127,7 +127,8 @@ void Foam::DSMCCloud<ParcelType>::initialise()
                 const typename ParcelType::constantProperties& cP = constProps(typeId);
 
                 // Calculate the number of particles required
-                scalar particlesRequired = rhoN_[celli] * moleculeAbundancies[i] / nParticle_;
+                scalar particlesRequired = rhoN_[celli] * tetVolume *
+                        moleculeAbundancies[i] / nParticle_;
 
                 particlesRequired =
                         (particlesRequired - label(particlesRequired)) > rndGen_.scalar01() ?
@@ -162,7 +163,7 @@ void Foam::DSMCCloud<ParcelType>::initialise()
             cP.mass()
         );
     }
-
+    Info << sigmaTcRMax_[0] << nl;
     sigmaTcRMax_.correctBoundaryConditions();
 }
 
@@ -341,6 +342,20 @@ void Foam::DSMCCloud<ParcelType>::collisions()
 template<class ParcelType>
 void Foam::DSMCCloud<ParcelType>::calculateFields()
 {
+    static uint64_t globalCounter;
+
+    const scalarField& volumes = mesh_.V();
+
+    forAll(mesh_.cells(), celli){
+        scalar currRhoN = cellOccupancy_[celli].size() * nParticle_ / volumes[celli];
+        rhoN_[celli] = (rhoN_[celli] * (globalCounter + 1) + currRhoN) / (globalCounter + 2);
+        vector currU(zero);
+        forAll(cellOccupancy_[celli], particlei){
+            currU += cellOccupancy_[celli][particlei].U();
+        }
+        U_[celli] = (U_[celli] * (globalCounter + 1) + currU / cellOccupancy_[celli].size())
+                / (globalCounter + 2);
+    }
 }
 
 
@@ -420,14 +435,13 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
     (
         IOobject
         (
-            this->name() + "rhoN",
+            "rhoN",
             mesh_.time().timeName(),
             mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
         ),
-        mesh_,
-        dimensionedScalar( dimensionSet(0, -3, 0, 0, 0), vSmall)
+        mesh_
     ),
     T_
     (
@@ -459,9 +473,18 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
             mesh_
         )
     ),
-    binaryCollisionModel_(),
-    wallInteractionModel_(),
-    inflowBoundaryModel_()
+    binaryCollisionModel_(
+        BinaryCollisionModel<DSMCCloud<ParcelType>>::New(
+                                                       particleProperties_,
+                                                       *this)),
+    wallInteractionModel_(
+        WallInteractionModel<DSMCCloud<ParcelType>>::New(
+                                                       particleProperties_,
+                                                       *this)),
+    inflowBoundaryModel_(
+        InflowBoundaryModel<DSMCCloud<ParcelType>>::New(
+                                                      particleProperties_,
+                                                      *this))
 {
     clear();
     buildConstProps();
