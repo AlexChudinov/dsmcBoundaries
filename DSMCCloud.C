@@ -419,7 +419,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
     (
         particleProperties_.template lookup<scalar>("nEquivalentParticles")
     ),
-    cellOccupancy_(),
+    cellOccupancy_(mesh_.nCells()),
     sigmaTcRMax_
     (
         IOobject
