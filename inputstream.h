@@ -81,7 +81,7 @@ public:
 template<class CloudType>
 void InputStream<CloudType>::checkTemperature() const
 {
-    const volScalarField::Boundary& boundaryT = this->owner().boundaryT().boundaryField();
+    const volScalarField::Boundary& boundaryT = this->owner().boundaryT();
     forAll(patches_, p){
         if(min(boundaryT[p]) < small){
             FatalErrorInFunction
@@ -174,11 +174,11 @@ void InputStream<CloudType>::inflow()
 
     label particlesInserted = 0;
 
-    const volScalarField::Boundary& boundaryT = cloud.boundaryT().boundaryField();
+    const volScalarField::Boundary& boundaryT = cloud.boundaryT();
 
-    const volVectorField::Boundary& boundaryU = cloud.boundaryU().boundaryField();
+    const volVectorField::Boundary& boundaryU = cloud.boundaryU();
 
-    const volScalarField::Boundary& rhoN = cloud.rhoN().boundaryField();
+    const volScalarField::Boundary& rhoN = cloud.boundaryRhoN();
 
     forAll(componentMasses_, componenti)
     {

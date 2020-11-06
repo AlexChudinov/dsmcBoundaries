@@ -52,7 +52,6 @@ HEADERS += \
     BinaryCollisionModel.H \
     dsmcCloud.H \
     DSMCCloud.H \
-    DSMCCloudI.H \
     dsmcParcel.H \
     DSMCParcel.H \
     DSMCParcelI.H \
