@@ -347,16 +347,22 @@ void Foam::DSMCCloud<ParcelType>::calculateFields()
     const scalarField& volumes = mesh_.V();
 
     forAll(mesh_.cells(), celli){
+        if(cellOccupancy_[celli].size() == 0)
+            continue;
         scalar currRhoN = cellOccupancy_[celli].size() * nParticle_ / volumes[celli];
         rhoN_[celli] = (rhoN_[celli] * (globalCounter + 1) + currRhoN) / (globalCounter + 2);
         vector currU(0.0, 0.0, 0.0);
         forAll(cellOccupancy_[celli], particlei){
             currU = currU + cellOccupancy_[celli][particlei]->U();
         }
+
+        U_[celli] = (U_[celli] * (globalCounter + 1) + currU / cellOccupancy_[celli].size())
+                / (globalCounter + 2);
+
         scalar Ttr = 0, Tint = 0;
         scalar w = 0;
         forAll(cellOccupancy_[celli], particlei){
-            vector dv = cellOccupancy_[celli][particlei]->U() - currU;
+            vector dv = cellOccupancy_[celli][particlei]->U() - U_[celli];
             const typename ParcelType::constantProperties& cP =
                     constProps(cellOccupancy_[celli][particlei]->typeId());
             Ttr += 1.5 * (dv & dv) * cP.mass();
@@ -367,9 +373,6 @@ void Foam::DSMCCloud<ParcelType>::calculateFields()
         scalar currT = (Ttr + Tint) / w;
 
         T_[celli] = (T_[celli] * (globalCounter + 1) + currT) / (globalCounter + 2);
-
-        U_[celli] = (U_[celli] * (globalCounter + 1) + currU / cellOccupancy_[celli].size())
-                / (globalCounter + 2);
     }
     globalCounter++;
 }
