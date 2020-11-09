@@ -352,10 +352,14 @@ void Foam::DSMCCloud<ParcelType>::calculateFields()
         scalar currRhoN = cellOccupancy_[celli].size() * nParticle_ / volumes[celli];
         rhoN_[celli] = (rhoN_[celli] * (globalCounter + 1) + currRhoN) / (globalCounter + 2);
         vector currU(0.0, 0.0, 0.0);
+        scalar totalMass = 0;
         forAll(cellOccupancy_[celli], particlei){
-            currU = currU + cellOccupancy_[celli][particlei]->U();
+            const typename ParcelType::constantProperties& cP =
+                    constProps(cellOccupancy_[celli][particlei]->typeId());
+            currU = currU + cellOccupancy_[celli][particlei]->U() * cP.mass();
+            totalMass += cP.mass();
         }
-
+        currU /= totalMass;
         U_[celli] = (U_[celli] * (globalCounter + 1) + currU / cellOccupancy_[celli].size())
                 / (globalCounter + 2);
 
