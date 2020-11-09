@@ -189,7 +189,7 @@ void InputStream<CloudType>::inflow()
             const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
             forAll(patch, facei){
-                const face& f = patch[facei];
+                //const face& f = patch[facei];
 
                 label globalFaceIndex = facei + patch.start();
 
