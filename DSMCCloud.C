@@ -225,7 +225,7 @@ void Foam::DSMCCloud<ParcelType>::collisions()
 
             scalar selectedPairs =
                 collisionSelectionRemainder_[celli]
-              + 0.5*nC*rhoN_[celli]*nParticle_*nParticle_*sigmaTcRMax*deltaT
+              + 0.5*nC*rhoN_[celli]*sigmaTcRMax*deltaT
                /mesh_.cellVolumes()[celli];
 
             label nCandidates(selectedPairs);
