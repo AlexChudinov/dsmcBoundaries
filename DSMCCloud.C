@@ -131,14 +131,15 @@ void Foam::DSMCCloud<ParcelType>::initialise()
                         moleculeAbundancies[i] / nParticle_;
 
                 particlesRequired =
-                        (particlesRequired - label(particlesRequired)) > rndGen_.scalar01() ?
-                            label(particlesRequired) + 1 : label(particlesRequired);
+                        ((particlesRequired - label(particlesRequired)) > rndGen_.scalar01()) ?
+                             + 1 : label(particlesRequired);
 
                 for (label pI = 0; pI < particlesRequired; pI++)
                 {
                     point p = tet.randomPoint(rndGen_);
 
-                    vector U = equipartitionLinearVelocity(T_[celli], cP.mass());
+                    vector U = U_[celli]
+                            + equipartitionLinearVelocity(T_[celli], cP.mass());
 
                     scalar Ei = equipartitionInternalEnergy(
                         T_[celli],
@@ -163,7 +164,7 @@ void Foam::DSMCCloud<ParcelType>::initialise()
             cP.mass()
         );
     }
-    Info << sigmaTcRMax_[0] << nl;
+
     sigmaTcRMax_.correctBoundaryConditions();
 }
 
@@ -192,7 +193,7 @@ void Foam::DSMCCloud<ParcelType>::collisions()
         label nC(cellParcels.size());
 
         if (nC > 1)
-        {
+        {           
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Assign particles to one of 8 Cartesian subCells
 
@@ -225,8 +226,7 @@ void Foam::DSMCCloud<ParcelType>::collisions()
 
             scalar selectedPairs =
                 collisionSelectionRemainder_[celli]
-              + 0.5*nC*rhoN_[celli]*sigmaTcRMax*deltaT
-               /mesh_.cellVolumes()[celli];
+              + 0.5*nC*rhoN_[celli]*sigmaTcRMax*deltaT;
 
             label nCandidates(selectedPairs);
             collisionSelectionRemainder_[celli] = selectedPairs - nCandidates;
