@@ -192,70 +192,41 @@ void InputStream<CloudType>::inflow()
 
                 occupancy[celli].clear();
 
-                const vector& fC = patch.faceCentres()[facei];
-
-                //small distance to put particle inside cell
-                const scalar smallStepInside = .0001 * mag(
-                            mesh.cells()[celli].centre(mesh.points(), mesh.faces()) - fC);
-
-                const vector n = - normalised(patch.faceAreas()[facei]);
-
-                const scalar fA = patch.magFaceAreas()[facei];
-
-                const scalar mostProbableSpeed = cloud.maxwellianMostProbableSpeed(
-                            boundaryT[patchi][facei],
-                            componentMasses_[componenti]);
-
-                const scalar sCosTheta = (boundaryU[patchi][facei] & n) / mostProbableSpeed;
-
-                List<tetIndices> faceTets = polyMeshTetDecomposition::faceTetIndices(
+                List<tetIndices> cellTets = polyMeshTetDecomposition::cellTetIndices
+                        (
                             mesh,
-                            globalFaceIndex,
-                            celli);
+                            celli
+                            );
 
-                //Cumulative fractions to simulate random tet at face
-                static std::vector<scalar> faceTetsFractions;
-                faceTetsFractions.assign(faceTets.size(), 0.0);
-                scalar cumulativeSum = 0.0;
-                forAll(faceTets, faceTeti){
-                    cumulativeSum += faceTets[faceTeti].faceTri(mesh).mag() / fA;
-                    faceTetsFractions[faceTeti] = cumulativeSum;
-                }
+                forAll(cellTets, tetI)
+                {
+                    const tetIndices& cellTetIs = cellTets[tetI];
+                    tetPointRef tet = cellTetIs.tet(mesh_);
+                    scalar tetVolume = tet.mag();
 
-                scalar nP = fA
-                        * componentAbundances_[componenti] * rhoN[patchi][facei]
-                        * deltaT / cloud.nParticle()
-                        * mostProbableSpeed
-                        *(exp(-sqr(sCosTheta)) + sqrtPi*sCosTheta*(1 + erf(sCosTheta)))
-                        /(2.0*sqrtPi);
+                    scalar nP = tetVolume * rhoN[facei] / cloud.nParticle();
 
-                label numberOfParticles = rndGen.scalar01() > nP - label(nP) ?
-                            label(nP) : label(nP) + 1;
+                    label numberOfParticles = rndGen.scalar01() > nP - label(nP) ?
+                                label(nP) : label(nP) + 1;
 
-                for(label i = 0; i < numberOfParticles; ++i){
-                    label triIdx = std::distance(faceTetsFractions.begin(),
-                                                 std::lower_bound(
-                                                     faceTetsFractions.begin(),
-                                                     faceTetsFractions.end(), rndGen.scalar01()));
-                    triIdx = triIdx == faceTets.size() ? triIdx - 1 : triIdx;
+                    for(label i = 0; i < numberOfParticles; ++i){
 
-                    const point r0 = faceTets[triIdx].faceTri(mesh).randomPoint(rndGen)
-                            + n * smallStepInside;
+                        const point r0 = tet.randomPoint(rndGen);
 
-                    const vector molecularVecolity = genMoleculeVelocity(
-                                rndGen,
-                                n,
-                                boundaryU[patchi][facei],
-                                componentMasses_[componenti],
-                                boundaryT[patchi][facei]);
+                        const vector molecularVecolity = genMoleculeVelocity(
+                                    rndGen,
+                                    boundaryU[patchi][facei],
+                                    componentMasses_[componenti],
+                                    boundaryT[patchi][facei]);
 
-                    scalar Ei = cloud.equipartitionInternalEnergy(
-                                boundaryT[patchi][facei],
-                                cloud.constProps(componentTypeId_[componenti]).internalDegreesOfFreedom());
+                        scalar Ei = cloud.equipartitionInternalEnergy(
+                                    boundaryT[patchi][facei],
+                                    cloud.constProps(componentTypeId_[componenti]).internalDegreesOfFreedom());
 
-                    cloud.addNewParcel(r0, celli, molecularVecolity, Ei, componentTypeId_[componenti]);
+                        cloud.addNewParcel(r0, celli, molecularVecolity, Ei, componentTypeId_[componenti]);
 
-                    particlesInserted++;
+                        particlesInserted++;
+                    }
                 }
             }
         }
