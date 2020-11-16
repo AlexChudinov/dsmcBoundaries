@@ -155,7 +155,7 @@ void InputStream<CloudType>::inflow()
 {
     CloudType& cloud = this->owner();
 
-    List<DynamicList<typename CloudeType::particleType*>>& occupancy = cloud.cellOccupancy();
+    List<DynamicList<typename CloudType::particleType*>>& occupancy = cloud.cellOccupancy();
 
     const polyMesh & mesh = cloud.mesh();
 
@@ -201,10 +201,10 @@ void InputStream<CloudType>::inflow()
                 forAll(cellTets, tetI)
                 {
                     const tetIndices& cellTetIs = cellTets[tetI];
-                    tetPointRef tet = cellTetIs.tet(mesh_);
+                    tetPointRef tet = cellTetIs.tet(mesh);
                     scalar tetVolume = tet.mag();
 
-                    scalar nP = tetVolume * rhoN[facei] / cloud.nParticle();
+                    scalar nP = tetVolume * rhoN[patchi][facei] / cloud.nParticle();
 
                     label numberOfParticles = rndGen.scalar01() > nP - label(nP) ?
                                 label(nP) : label(nP) + 1;

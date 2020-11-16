@@ -357,7 +357,7 @@ void Foam::DSMCCloud<ParcelType>::calculateFields()
                     constProps(cellOccupancy_[celli][particlei]->typeId());
             currU = currU + cellOccupancy_[celli][particlei]->U() * cP.mass();
             currU2 += (cellOccupancy_[celli][particlei]->U() &
-                    cellOccupancy_[celli][particlei]->U()) * cp.mass();
+                    cellOccupancy_[celli][particlei]->U()) * cP.mass();
             totalMass += cP.mass();
         }
         currU /= totalMass;
