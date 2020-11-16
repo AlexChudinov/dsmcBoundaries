@@ -374,7 +374,7 @@ void Foam::DSMCCloud<ParcelType>::calculateFields()
             w += 3. + cP.internalDegreesOfFreedom();
         }
 
-        scalar currT = (1.5 * totalMass * ((U_[celli] & U_[celli]) - U2_[celli]) + Tint)
+        scalar currT = (1.5 * totalMass * (U2_[celli] - (U_[celli] & U_[celli])) + Tint)
                 / (w * physicoChemical::k.value());
 
         T_[celli] = (T_[celli] * stepCounter_ + currT) / (stepCounter_ + 1);
