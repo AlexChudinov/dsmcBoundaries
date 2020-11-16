@@ -155,8 +155,6 @@ void InputStream<CloudType>::inflow()
 {
     CloudType& cloud = this->owner();
 
-    List<DynamicList<typename CloudType::particleType*>>& occupancy = cloud.cellOccupancy();
-
     const polyMesh & mesh = cloud.mesh();
 
     const scalar deltaT = mesh.time().deltaTValue();
@@ -185,12 +183,6 @@ void InputStream<CloudType>::inflow()
                 label globalFaceIndex = facei + patch.start();
 
                 label celli = mesh.faceOwner()[globalFaceIndex];
-
-                forAll(occupancy[celli], parceli){
-                    cloud.deleteParticle(*occupancy[celli][parceli]);
-                }
-
-                occupancy[celli].clear();
 
                 List<tetIndices> cellTets = polyMeshTetDecomposition::cellTetIndices
                         (
@@ -223,7 +215,16 @@ void InputStream<CloudType>::inflow()
                                     boundaryT[patchi][facei],
                                     cloud.constProps(componentTypeId_[componenti]).internalDegreesOfFreedom());
 
-                        cloud.addNewParcel(r0, celli, molecularVecolity, Ei, componentTypeId_[componenti]);
+                        typename CloudType::particleType* particle =
+                                new typename CloudType::particleType(
+                                    mesh,
+                                    r0,
+                                    celli,
+                                    molecularVecolity,
+                                    Ei,
+                                    componentTypeId_[componenti]);
+
+                        cloud.addParticle(particle);
 
                         particlesInserted++;
                     }
