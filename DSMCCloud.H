@@ -126,6 +126,11 @@ class DSMCCloud
         //velocity
         volVectorField U_;
 
+        //square of velocity
+        volScalarField U2_;
+
+        //number of times of cloud was evolved
+        uint64_t stepCounter_;
 
         // References to the cloud sub-models
 
@@ -214,6 +219,9 @@ public:
                 //- Return the cell occupancy addressing
                 inline const List<DynamicList<ParcelType*>>&
                     cellOccupancy() const;
+
+                inline List<DynamicList<ParcelType*>>&
+                    cellOccupancy();
 
                 //- Return the sigmaTcRMax field.  non-const access to allow
                 // updating.
@@ -452,6 +460,13 @@ inline Foam::scalar Foam::DSMCCloud<ParcelType>::nParticle() const
 template<class ParcelType>
 inline const Foam::List<Foam::DynamicList<ParcelType*>>&
 Foam::DSMCCloud<ParcelType>::cellOccupancy() const
+{
+    return cellOccupancy_;
+}
+
+template<class ParcelType>
+Foam::List<Foam::DynamicList<ParcelType *> > &
+Foam::DSMCCloud<ParcelType>::cellOccupancy()
 {
     return cellOccupancy_;
 }

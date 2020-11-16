@@ -132,7 +132,7 @@ void Foam::DSMCCloud<ParcelType>::initialise()
 
                 particlesRequired =
                         ((particlesRequired - label(particlesRequired)) > rndGen_.scalar01()) ?
-                             + 1 : label(particlesRequired);
+                            label(particlesRequired) + 1 : label(particlesRequired);
 
                 for (label pI = 0; pI < particlesRequired; pI++)
                 {
@@ -342,43 +342,43 @@ void Foam::DSMCCloud<ParcelType>::collisions()
 template<class ParcelType>
 void Foam::DSMCCloud<ParcelType>::calculateFields()
 {
-    static uint64_t globalCounter;
-
     const scalarField& volumes = mesh_.V();
-
+    stepCounter_ ++;
     forAll(mesh_.cells(), celli){
         if(cellOccupancy_[celli].size() == 0)
             continue;
         scalar currRhoN = cellOccupancy_[celli].size() * nParticle_ / volumes[celli];
-        rhoN_[celli] = (rhoN_[celli] * (globalCounter + 1) + currRhoN) / (globalCounter + 2);
+        rhoN_[celli] = (rhoN_[celli] * stepCounter_ + currRhoN) / (stepCounter_ + 1);
         vector currU(0.0, 0.0, 0.0);
-        scalar totalMass = 0;
+        scalar currU2 = 0.0;
+        scalar totalMass = 0.0;
         forAll(cellOccupancy_[celli], particlei){
             const typename ParcelType::constantProperties& cP =
                     constProps(cellOccupancy_[celli][particlei]->typeId());
             currU = currU + cellOccupancy_[celli][particlei]->U() * cP.mass();
+            currU2 += (cellOccupancy_[celli][particlei]->U() &
+                    cellOccupancy_[celli][particlei]->U()) * cp.mass();
             totalMass += cP.mass();
         }
         currU /= totalMass;
-        U_[celli] = (U_[celli] * (globalCounter + 1) + currU / cellOccupancy_[celli].size())
-                / (globalCounter + 2);
+        currU2 /= totalMass;
+        U_[celli] = (U_[celli] * stepCounter_ + currU) / (stepCounter_ + 1);
+        U2_[celli] = (U2_[celli] * stepCounter_ + currU2) / (stepCounter_ + 1);
 
-        scalar Ttr = 0, Tint = 0;
+        scalar Tint = 0;
         scalar w = 0;
         forAll(cellOccupancy_[celli], particlei){
-            vector dv = cellOccupancy_[celli][particlei]->U() - U_[celli];
             const typename ParcelType::constantProperties& cP =
                     constProps(cellOccupancy_[celli][particlei]->typeId());
-            Ttr += 1.5 * (dv & dv) * cP.mass();
             Tint += cellOccupancy_[celli][particlei]->Ei() * cP.internalDegreesOfFreedom();
             w += 3. + cP.internalDegreesOfFreedom();
         }
 
-        scalar currT = (Ttr + Tint) / w;
+        scalar currT = (1.5 * totalMass * ((U_[celli] & U_[celli]) - U2_[celli]) + Tint)
+                / (w * physicoChemical::k.value());
 
-        T_[celli] = (T_[celli] * (globalCounter + 1) + currT) / (globalCounter + 2);
+        T_[celli] = (T_[celli] * stepCounter_ + currT) / (stepCounter_ + 1);
     }
-    globalCounter++;
 }
 
 
@@ -496,6 +496,21 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
             mesh_
         )
     ),
+    U2_
+    (
+        IOobject
+        (
+            "U",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+            ),
+        mesh_,
+        dimensionedScalar(dimensionSet(0,2,-2,0,0,0,0), 0.0),
+        zeroGradientFvPatchScalarField::typeName
+        ),
+    stepCounter_(0),
     binaryCollisionModel_(
         BinaryCollisionModel<DSMCCloud<ParcelType>>::New(
                                                        particleProperties_,

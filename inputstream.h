@@ -44,7 +44,6 @@ class InputStream
 
     vector genMoleculeVelocity(
             Random& rndGen,
-            const vector& n,
             const vector& U,
             double mass,
             double T);
@@ -95,7 +94,6 @@ void InputStream<CloudType>::checkTemperature() const
 template<class CloudType>
 vector InputStream<CloudType>::genMoleculeVelocity(
         Random &rndGen,
-        const vector &n,
         const vector &U,
         double mass,
         double T)
@@ -103,17 +101,8 @@ vector InputStream<CloudType>::genMoleculeVelocity(
     //n - normal pointing inside
     CloudType& cloud = this->owner();
     scalar s = cloud.maxwellianMostProbableSpeed(T, mass) / sqrt(2.0);
-    scalar vInf = (n & U) < -3.0 * s ? s : (n & U) + 3.0 * s;
-    vector moleculeVelocity;
-    do
-    {
-        moleculeVelocity = s *
-                vector(rndGen.scalarNormal(), rndGen.scalarNormal(), rndGen.scalarNormal())
-                + U;
-    }
-    while((moleculeVelocity & n) / vInf < rndGen.scalar01());
-
-    return moleculeVelocity;
+    return s * vector(rndGen.scalarNormal(), rndGen.scalarNormal(), rndGen.scalarNormal())
+            + U;
 }
 
 template<class CloudType>
@@ -166,6 +155,8 @@ void InputStream<CloudType>::inflow()
 {
     CloudType& cloud = this->owner();
 
+    List<DynamicList<typename CloudeType::particleType*>>& occupancy = cloud.cellOccupancy();
+
     const polyMesh & mesh = cloud.mesh();
 
     const scalar deltaT = mesh.time().deltaTValue();
@@ -194,6 +185,12 @@ void InputStream<CloudType>::inflow()
                 label globalFaceIndex = facei + patch.start();
 
                 label celli = mesh.faceOwner()[globalFaceIndex];
+
+                forAll(occupancy[celli], parceli){
+                    cloud.deleteParticle(*occupancy[celli][parceli]);
+                }
+
+                occupancy[celli].clear();
 
                 const vector& fC = patch.faceCentres()[facei];
 
