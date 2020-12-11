@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dsmcParcel.H"
+#include "DSMCParcel.H"
 #include "DSMCCloud.H"
 #include "MaxwellianThermal.H"
 #include "SpecularReflection.H"

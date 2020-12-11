@@ -45,12 +45,12 @@ SourceFiles
 #include "scalarIOField.H"
 #include "barycentric.H"
 #include "constants.H"
+#include "DSMCParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 // Forward declaration of classes
 
 template<class CloudType>
@@ -68,10 +68,14 @@ class InflowBoundaryModel;
 
 TemplateName(DSMCCloud);
 
+template <class parcel> class DSMCCloud;
+
+typedef DSMCCloud<dsmcParcel> dsmcCloud;
 
 /*---------------------------------------------------------------------------*\
                          Class DSMCCloud Declaration
 \*---------------------------------------------------------------------------*/
+
 
 template<class ParcelType>
 class DSMCCloud

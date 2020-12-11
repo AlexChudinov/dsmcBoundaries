@@ -41,7 +41,8 @@ SourceFiles
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "contiguous.H"
-#include "DSMCCloud.H"
+#include "Cloud.H"
+//#include "DSMCCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,6 +51,8 @@ namespace Foam
 
 template<class ParcelType>
 class DSMCParcel;
+
+typedef DSMCParcel<particle> dsmcParcel;
 
 // Forward declaration of friend functions
 
@@ -293,7 +296,6 @@ public:
             const DSMCParcel<ParcelType>&
         );
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dsmcParcel.H"
+#include "DSMCParcel.H"
 #include "DSMCCloud.H"
 #include "NoBinaryCollision.H"
 #include "VariableHardSphere.H"

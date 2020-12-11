@@ -50,9 +50,7 @@ SOURCES += \
 
 HEADERS += \
     BinaryCollisionModel.H \
-    dsmcCloud.H \
     DSMCCloud.H \
-    dsmcParcel.H \
     DSMCParcel.H \
     DSMCParcelI.H \
     FreeStream.H \
