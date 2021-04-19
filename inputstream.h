@@ -178,6 +178,9 @@ void InputStream<CloudType>::inflow()
 
             const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
+            if (!isType<polyPatch>(patch))
+                continue;
+
             forAll(patch, facei){
                 //const face& f = patch[facei];
 

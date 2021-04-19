@@ -345,7 +345,7 @@ void Foam::DSMCCloud<ParcelType>::calculateFields()
     const scalarField& volumes = mesh_.V();
     stepCounter_ ++;
     forAll(mesh_.cells(), celli){
-        if(cellOccupancy_[celli].size() == 0)
+        if(cellOccupancy_[celli].empty())
             continue;
         scalar currRhoN = cellOccupancy_[celli].size() * nParticle_ / volumes[celli];
         rhoN_[celli] = (rhoN_[celli] * stepCounter_ + currRhoN) / (stepCounter_ + 1);
